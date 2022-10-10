@@ -14,4 +14,3 @@ This includes
 * Secrets
 * New Score TXT (secret one in week 6) (DONE)
 * Options To Make Game Hard
-* Automaticly Updates In Game! (finally)
