@@ -49,6 +49,10 @@ import hscript.Interp;
 import Discord;
 #end
 
+import WindowsAPI;
+import lime.app.Application;
+import lime.ui.Window;
+
 using StringTools;
 
 class FunkinLua {
@@ -1930,23 +1934,20 @@ class FunkinLua {
 			}
 			return false;
 		});
+
 		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
 			#if VIDEOS_ALLOWED
-			if(FileSystem.exists(Paths.video(videoFile))) {
+			if(FileSystem.exists(Paths.modsVideo(videoFile))) {
 				PlayState.instance.startVideo(videoFile);
-				return true;
 			} else {
-				luaTrace('Video file not found: ' + videoFile, false, false, FlxColor.RED);
+				luaTrace('Video file not found: ' + videoFile);
 			}
-			return false;
-
 			#else
 			if(PlayState.instance.endingSong) {
 				PlayState.instance.endSong();
 			} else {
 				PlayState.instance.startCountdown();
 			}
-			return true;
 			#end
 		});
 
@@ -2068,6 +2069,26 @@ class FunkinLua {
 			#end
 		});
 
+		// WINDOW API WOOO \\
+
+		//Transparency
+		Lua_helper.add_callback(lua, "setTransparency", function(r:Int, g:Int, b:Int) {
+			WindowsAPI.setWindowTransparencyColor(r, g, b);
+		});
+		Lua_helper.add_callback(lua, "removeTransparency", function(result:Bool) {
+			WindowsAPI.disableWindowTransparency(result);
+		});
+
+		//Pop Up
+		Lua_helper.add_callback(lua, "windowMessagePopup", function(title:String, text:String, icon:MessageBoxIcon) {
+			WindowsAPI.showMessagePopup(title, text, icon);
+			return 0;
+		});
+
+		//Change Window Name
+		Lua_helper.add_callback(lua, "changeWindowTitle", function(title:String) {
+			Application.current.window.title = title;
+		});
 
 		// LUA TEXTS
 		Lua_helper.add_callback(lua, "makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
