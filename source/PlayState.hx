@@ -70,7 +70,10 @@ import sys.FileSystem;
 
 #if VIDEOS_ALLOWED
 import vlc.MP4Handler;
+import vlc.MP4Sprite;
 #end
+
+import GreenScreenShader;
 
 using StringTools;
 
@@ -3464,23 +3467,23 @@ for (key => value in luaShaders)
 		return pressed;
 	}
 
-	// 	function chromaVideo(name:String){
-	// 	var video = new VideoSprite(0,0);
-	// 	video.scrollFactor.set();
-	// 	video.cameras = [camHUD];
-	// 	video.shader = new GreenScreenShader();
-	// 	video.visible=false;
-	// 	video.finishCallback = function(){
-	// 		trace("video gone");
-	// 		remove(video);
-	// 		video.destroy();
-	// 	}
-	// 	video.playVideo(Paths.video(name));
-	// 	video.readyCallback = function(){
-	// 		video.visible=true;
-	// 	}
-	// 	add(video);
-	// }
+		function chromaVideo(name:String){
+		var video = new MP4Sprite(0,0);
+		video.scrollFactor.set();
+		video.cameras = [camHUD];
+		video.shader = new GreenScreenShader();
+		video.visible=false;
+		video.finishCallback = function(){
+			trace("video gone");
+			remove(video);
+			video.destroy();
+		}
+		video.playVideo(Paths.video(name));
+		video.readyCallback = function(){
+			video.visible=true;
+		}
+		add(video);
+	}
 
 	public function triggerEventNote(eventName:String, value1:String, value2:String) {
 		switch(eventName) {
@@ -3557,8 +3560,8 @@ for (key => value in luaShaders)
 				if(Math.isNaN(value) || value < 1) value = 1;
 				gfSpeed = value;
 
-			// case 'Chroma Video':
-			// 	if(ClientPrefs.flashing)chromaVideo(value1);
+			case 'Chroma Video':
+				if(ClientPrefs.flashing)chromaVideo(value1);
 
 			case 'Philly Glow':
 				var lightId:Int = Std.parseInt(value1);
