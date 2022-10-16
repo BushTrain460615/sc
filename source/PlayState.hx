@@ -64,6 +64,9 @@ import DialogueBoxPsych;
 import Conductor.Rating;
 import Shaders;
 import DynamicShaderHandler;
+import sys.FileSystem;
+import sys.io.File;
+
 #if sys
 import sys.FileSystem;
 #end
@@ -166,16 +169,15 @@ class PlayState extends MusicBeatState
 	private static var prevCamFollow:FlxPoint;
 	private static var prevCamFollowPos:FlxObject;
 
-	// FAKE \\
-	public var fstrumLineNotes:FlxTypedGroup<StrumNote>;
-	public var fopponentStrums:FlxTypedGroup<StrumNote>;
-	public var fplayerStrums:FlxTypedGroup<StrumNote>;
-
-	// REAL \\
 	public var strumLineNotes:FlxTypedGroup<StrumNote>;
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+
+	//for the credits at beginning of song lol!
+	var creditsText:FlxTypedGroup<FlxText>;
+	var creditoText:FlxText;
+	var box:FlxSprite;
 
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
@@ -1034,10 +1036,9 @@ class PlayState extends MusicBeatState
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
-		timeTxt.scale.set(1.05, 0.9);
-		timeTxt.visible = showTime;
-		timeTxt.size = 15;
+		timeTxt.size = 20;
 		timeTxt.screenCenter(X);
+		timeTxt.visible = showTime;
 		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
 		updateTime = showTime;
 
@@ -1063,8 +1064,6 @@ class PlayState extends MusicBeatState
 		add(timeTxt);
 		timeBarBG.sprTracker = timeBar;
 
-		fstrumLineNotes = new FlxTypedGroup<StrumNote>();
-		add(fstrumLineNotes);
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 		add(grpNoteSplashes);
@@ -1072,9 +1071,6 @@ class PlayState extends MusicBeatState
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
-
-		fopponentStrums = new FlxTypedGroup<StrumNote>();
-		fplayerStrums = new FlxTypedGroup<StrumNote>();
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();
@@ -1173,6 +1169,7 @@ class PlayState extends MusicBeatState
 		healthBarBG.visible = !ClientPrefs.hideHud;
 		healthBarBG.xAdd = -4;
 		healthBarBG.yAdd = -4;
+		healthBarBG.alpha = 0;
 		add(healthBarBG);
 		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
 
@@ -1183,18 +1180,21 @@ class PlayState extends MusicBeatState
 		healthBar.visible = !ClientPrefs.hideHud;
 		healthBar.alpha = ClientPrefs.healthBarAlpha;
 		add(healthBar);
+		healthBar.alpha = 0;
 		healthBarBG.sprTracker = healthBar;
 
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.hideHud;
 		iconP1.alpha = ClientPrefs.healthBarAlpha;
+		iconP1.alpha = 0;
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.hideHud;
 		iconP2.alpha = ClientPrefs.healthBarAlpha;
+		iconP2.alpha = 0;
 		add(iconP2);
 		reloadHealthBarColors();
 
@@ -1203,6 +1203,7 @@ class PlayState extends MusicBeatState
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.hideHud;
+		scoreTxt.alpha = 0;
 		add(scoreTxt);
 
 		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
@@ -2385,10 +2386,77 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 		}
 
+		creditsText = new FlxTypedGroup<FlxText>();
+		//in here, specify your song name and then its credits, then go to the next switch
+		switch(SONG.song.toLowerCase())
+		{
+			default:
+				box = new FlxSprite(0, -1000).loadGraphic(Paths.image("box"));
+				box.cameras = [camHUD];
+				box.setGraphicSize(Std.int(box.height * 0.8));
+				box.screenCenter(X);
+				add(box);
+
+				var texti:String;
+				var size:String;
+
+				if (FileSystem.exists(Paths.json(curSong.toLowerCase() + "/credits")))
+				{
+					texti = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("TIME")[0];
+					size = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("SIZE")[1];
+				}
+				else
+				{
+					texti = "CREDITS\nunfinished";
+					size = '28';
+				}
+
+				creditoText = new FlxText(0, -1000, 0, texti, 28);
+				creditoText.cameras = [camHUD];
+				creditoText.setFormat(Paths.font("PressStart2P.ttf"), Std.parseInt(size), FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				creditoText.setGraphicSize(Std.int(creditoText.width * 0.8));
+				creditoText.updateHitbox();
+				creditoText.x += 515;
+				creditsText.add(creditoText);
+		}
+		add(creditsText);
+
+		//this is the timing of the box coming in, specify your song and IF NEEDED, change the amount of time it takes to come in
+		//if you want to add it to start at the beginning of the song, type " | ", then add your song name
+		//poop fart ahahahahahah
+		switch (SONG.song.toLowerCase())
+		{
+			default:
+				var timei:String;
+
+				if (FileSystem.exists(Paths.json(curSong.toLowerCase() + "/credits")))
+				{
+					timei = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("TIME")[1];
+				}
+				else
+				{
+					timei = "2.35";
+				}
+
+				FlxG.log.add('BTW THE TIME IS ' + Std.parseFloat(timei));
+
+				new FlxTimer().start(Std.parseFloat(timei), function(tmr:FlxTimer)
+					{
+						tweencredits();
+					});
+		}
+
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+
+		FlxTween.tween(healthBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.tween(healthBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.tween(iconP1, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.tween(iconP2, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+
+		FlxTween.tween(scoreTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
 		switch(curStage)
 		{
@@ -2585,6 +2653,24 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 		generatedMusic = true;
 	}
+
+	function tweencredits()
+		{
+			FlxTween.tween(creditoText, {y: FlxG.height - 625}, 0.5, {ease: FlxEase.circOut});
+			FlxTween.tween(box, {y: 0}, 0.5, {ease: FlxEase.circOut});
+			//tween away
+			new FlxTimer().start(3, function(tmr:FlxTimer)
+				{
+					FlxTween.tween(creditoText, {y: -1000}, 0.5, {ease: FlxEase.circOut});
+					FlxTween.tween(box, {y: -1000}, 0.5, {ease: FlxEase.circOut});
+					//removal
+					new FlxTimer().start(0.5, function(tmr:FlxTimer)
+						{
+							remove(creditsText);
+							remove(box);
+						});
+				});
+		}
 
 	function eventPushed(event:EventNote) {
 		switch(event.event) {
@@ -3211,8 +3297,6 @@ class PlayState extends MusicBeatState
 			var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				var fstrumGroup:FlxTypedGroup<StrumNote> = fplayerStrums;
-				if(!daNote.mustPress) fstrumGroup = fopponentStrums;
 				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 				if(!daNote.mustPress) strumGroup = opponentStrums;
 
