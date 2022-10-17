@@ -10,3 +10,5 @@ TODO
 * Options To Make Game Hard
 * Icon Bop
 * New Shaders
+* New Discord RPC
+* HScript Support
