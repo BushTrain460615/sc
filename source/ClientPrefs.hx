@@ -8,6 +8,8 @@ import Controls;
 
 class ClientPrefs {
 	public static var timerSongName:Bool = false;
+	public static var splash:Bool = false;
+	public static var fullScreen:Bool = false;
 	
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
@@ -95,6 +97,9 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
+		FlxG.save.data.splash = splash;
+		FlxG.save.data.fullScreen = fullScreen;
+
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
@@ -141,6 +146,13 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.splash != null) {
+			splash = FlxG.save.data.splash;
+		}
+		if(FlxG.save.data.fullScreen != null) {
+			fullScreen = FlxG.save.data.fullScreen;
+		}
+
 		if(FlxG.save.data.downScroll != null) {
 			downScroll = FlxG.save.data.downScroll;
 		}

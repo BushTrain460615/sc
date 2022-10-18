@@ -66,6 +66,9 @@ import Shaders;
 import DynamicShaderHandler;
 import sys.FileSystem;
 import sys.io.File;
+import hscript.Interp;
+import hscript.Parser;
+import HscriptHandler;
 
 #if sys
 import sys.FileSystem;
@@ -312,6 +315,7 @@ class PlayState extends MusicBeatState
 	// Lua shit
 	public static var instance:PlayState;
 	public var luaArray:Array<FunkinLua> = [];
+	public var hscriptArray:Map<String, Interp> = []; // it should work like luaarray. String is tag and interp is actual hscript interp
 	private var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
 	public var introSoundsSuffix:String = '';
 	public var luaShaders:Map<String, DynamicShaderHandler> = new Map<String, DynamicShaderHandler>();
@@ -890,10 +894,23 @@ class PlayState extends MusicBeatState
 				for (file in FileSystem.readDirectory(folder))
 				{
 					if(file.endsWith('.lua') && !filesPushed.contains(file))
-					{
-						luaArray.push(new FunkinLua(folder + file));
-						filesPushed.push(file);
-					}
+						{
+							luaArray.push(new FunkinLua(folder + file));
+							filesPushed.push(file);
+						} else if (file.endsWith('.hx') && !filesPushed.contains(file)) {
+							var exparser = new Parser();
+							exparser.allowMetadata = true;
+							exparser.allowTypes = true;
+							var parsedstring = exparser.parseString(File.getContent(folder + file));
+							var interp = new Interp();
+							interp = HscriptHandler.setVars(interp);
+							//var interp = HscriptHandler.createInterpWithVars();
+	
+							interp.execute(parsedstring);
+							hscriptArray.set(folder + file,interp);
+							filesPushed.push(file);
+							trace('HScript file loaded: ' + folder + file);
+						}
 				}
 			}
 		}
@@ -1258,10 +1275,23 @@ class PlayState extends MusicBeatState
 				for (file in FileSystem.readDirectory(folder))
 				{
 					if(file.endsWith('.lua') && !filesPushed.contains(file))
-					{
-						luaArray.push(new FunkinLua(folder + file));
-						filesPushed.push(file);
-					}
+						{
+							luaArray.push(new FunkinLua(folder + file));
+							filesPushed.push(file);
+						} else if (file.endsWith('.hx') && !filesPushed.contains(file)) {
+							var exparser = new Parser();
+							exparser.allowMetadata = true;
+							exparser.allowTypes = true;
+							var parsedstring = exparser.parseString(File.getContent(folder + file));
+							var interp = new Interp();
+							interp = HscriptHandler.setVars(interp);
+							//var interp = HscriptHandler.createInterpWithVars();
+	
+							interp.execute(parsedstring);
+							hscriptArray.set(folder + file, interp);
+							filesPushed.push(file);
+							trace('HScript file loaded: ' + folder + file);
+						}
 				}
 			}
 		}
@@ -1368,6 +1398,7 @@ class PlayState extends MusicBeatState
 
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
 		callOnLuas('onCreatePost', []);
+		callOnHScripts('create', []);
 
 		super.create();
 
@@ -2966,6 +2997,7 @@ class PlayState extends MusicBeatState
 			iconP1.swapOldIcon();
 		}*/
 		callOnLuas('onUpdate', [elapsed]);
+		callOnHScripts('update', [elapsed]);
 
 		switch (curStage)
 		{
@@ -4467,6 +4499,7 @@ for (key => value in luaShaders)
 					callOnLuas('onGhostTap', [key]);
 					if (canMiss) {
 						noteMissPress(key);
+						callOnHScripts('noteMissPress', [key]);
 					}
 				}
 
@@ -4488,6 +4521,7 @@ for (key => value in luaShaders)
 				spr.resetAnim = 0;
 			}
 			callOnLuas('onKeyPress', [key]);
+			callOnHScripts('onKeyPress', [key]);
 		}
 		//trace('pressed: ' + controlArray);
 	}
@@ -4606,6 +4640,7 @@ for (key => value in luaShaders)
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
+		callOnHScripts('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 		notes.forEachAlive(function(note:Note) {
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
 				note.kill();
@@ -4734,6 +4769,7 @@ for (key => value in luaShaders)
 		note.hitByOpponent = true;
 
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+		callOnHScripts('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
 		if (!note.isSustainNote)
 		{
@@ -4843,6 +4879,7 @@ for (key => value in luaShaders)
 			var leData:Int = Math.round(Math.abs(note.noteData));
 			var leType:String = note.noteType;
 			callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
+			callOnHScripts('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 
 			if (!note.isSustainNote)
 			{
@@ -5196,7 +5233,35 @@ for (key => value in luaShaders)
 		lastBeatHit = curBeat;
 
 		setOnLuas('curBeat', curBeat); //DAWGG?????
+		setOnLuas('curbeat', curBeat); //WHAAAAAA
 		callOnLuas('onBeatHit', []);
+		callOnHScripts('beatHit', [curBeat]);
+	}
+
+	function callSingleHScript(func:String, args:Array<Dynamic>, filename:String) {
+		if (!hscriptArray.get(filename).variables.exists(func)) {
+			return;
+		}
+		var method = hscriptArray.get(filename).variables.get(func);
+		if (args.length == 0) {
+			method();
+		} else if (args.length == 1) {
+			method(args[0]);
+		} else if (args.length == 5) {
+			method(args[0], args[1], args[2], args[3], args[4]);
+		} else if (args.length == 4) {
+			method(args[0], args[1], args[2], args[3]);
+		}else if (args.length == 3) {						// BEST CODE EVER I KNOW
+			method(args[0], args[1], args[2]);
+		}else if (args.length == 2) {
+			method(args[0], args[1]);
+		}
+	}
+
+	function callOnHScripts(func:String, args:Array<Dynamic>) {
+		for (i in hscriptArray.keys()) {
+			callSingleHScript(func, args, i);	// it could be easier ig
+		}
 	}
 
 	override function sectionHit()
@@ -5230,6 +5295,7 @@ for (key => value in luaShaders)
 		
 		setOnLuas('curSection', curSection);
 		callOnLuas('onSectionHit', []);
+		callOnHScripts('sectionHit', [curSection]);
 	}
 
 	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
