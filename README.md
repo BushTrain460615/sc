@@ -1,10 +1,8 @@
 # FNF Psych (MODIFIED)
 this was intended for Bamburg&Bombu but i guess i will make it public
 
-TODO
+TODO (almost done)
 
 * Rounded Health And Time Bar
 * Replay System
-* Playback System
 * Options To Make Game Hard
-* Icon Bop
