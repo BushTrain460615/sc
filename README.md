@@ -5,4 +5,3 @@ TODO (almost done)
 
 * Rounded Health And Time Bar
 * Replay System
-* Options To Make Game Hard
