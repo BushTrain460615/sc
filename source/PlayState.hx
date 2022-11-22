@@ -82,6 +82,7 @@ import vlc.MP4Sprite;
 #end
 
 import GreenScreenShader;
+import flixel.addons.display.FlxBackdrop;
 
 using CoolUtil;
 using StringTools;
@@ -129,6 +130,14 @@ class PlayState extends MusicBeatState
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	#end
 
+	// Kade Shit \\
+	public static var songPosBar:FlxBar;
+	public static var songPosBG:FlxSprite;
+	private var songPositionBar:Float = 0;
+	var songName2:FlxText;
+	var timeShown = 0;
+	var currentTimingShown:FlxText = null;
+
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
 	public var DAD_X:Float = 100;
@@ -158,6 +167,8 @@ class PlayState extends MusicBeatState
 
 	public var spawnTime:Float = 2000;
 
+	var healthTxt:FlxText;
+
 	public var vocals:FlxSound;
 
 	public var dad:Character = null;
@@ -181,11 +192,6 @@ class PlayState extends MusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
-
-	//for the credits at beginning of song lol!
-	var creditsText:FlxTypedGroup<FlxText>;
-	var creditoText:FlxText;
-	var box:FlxSprite;
 
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
@@ -285,11 +291,15 @@ class PlayState extends MusicBeatState
 	public var scoreTxt:FlxText;
 	var timeTxt:FlxText;
 	var scoreTxtTween:FlxTween;
+	var scoreTxtTween2:FlxTween;
+	
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
 	public static var seenCutscene:Bool = false;
 	public static var deathCounter:Int = 0;
+
+	var danceLeft:Bool = false; // lol stolen from TitleState.hx \\
 
 	public var defaultCamZoom:Float = 1.05;
 
@@ -1064,39 +1074,99 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.downScroll) strumLine.y = FlxG.height - 150;
 		strumLine.scrollFactor.set();
 
-		var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.size = 20;
-		timeTxt.screenCenter(X);
-		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		updateTime = showTime;
-
-		timeBarBG = new AttachedSprite('timeBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = showTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -4;
-		timeBarBG.yAdd = -4;
-		add(timeBarBG);
-
-		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = showTime;
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
+		switch(ClientPrefs.ui){
+			case 'HaxeLua':
+				var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
+				timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
+				timeTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				timeTxt.scrollFactor.set();
+				timeTxt.alpha = 0;
+				timeTxt.borderSize = 2;
+				timeTxt.size = 20;
+				timeTxt.screenCenter(X);
+				timeTxt.visible = showTime;
+				if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
+				updateTime = showTime;
+		
+				timeBarBG = new AttachedSprite('timeBar');
+				timeBarBG.x = timeTxt.x;
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
+				timeBarBG.scrollFactor.set();
+				timeBarBG.alpha = 0;
+				timeBarBG.visible = showTime;
+				timeBarBG.color = FlxColor.BLACK;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				add(timeBarBG);
+		
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+					'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				add(timeBar);
+				add(timeTxt);
+				timeBarBG.sprTracker = timeBar;
+			case 'Psych':
+				var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
+				timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
+				timeTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				timeTxt.scrollFactor.set();
+				timeTxt.alpha = 0;
+				timeTxt.borderSize = 2;
+				timeTxt.size = 20;
+				timeTxt.screenCenter(X);
+				timeTxt.visible = showTime;
+				if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
+				updateTime = showTime;
+		
+				timeBarBG = new AttachedSprite('timeBar');
+				timeBarBG.x = timeTxt.x;
+				timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
+				timeBarBG.scrollFactor.set();
+				timeBarBG.alpha = 0;
+				timeBarBG.visible = showTime;
+				timeBarBG.color = FlxColor.BLACK;
+				timeBarBG.xAdd = -4;
+				timeBarBG.yAdd = -4;
+				add(timeBarBG);
+		
+				timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+					'songPercent', 0, 1);
+				timeBar.scrollFactor.set();
+				timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+				timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+				timeBar.alpha = 0;
+				timeBar.visible = showTime;
+				add(timeBar);
+				add(timeTxt);
+				timeBarBG.sprTracker = timeBar;
+			case 'Kade':
+				songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('healthBar'));
+				if (ClientPrefs.downScroll)
+					songPosBG.y = FlxG.height * 0.9 + 45; 
+				songPosBG.screenCenter(X);
+				songPosBG.scrollFactor.set();
+				add(songPosBG);
+					
+				songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
+					'songPositionBar', 0, 1);
+				songPosBar.scrollFactor.set();
+				songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+				add(songPosBar);
+		
+				songName2 = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20,songPosBG.y,0,SONG.song, 16);
+				if (ClientPrefs.downScroll)
+					songName2.y -= 3;
+				songName2.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+				songName2.scrollFactor.set();
+				add(songName2);
+				songName2.cameras = [camHUD];
+				songPosBG.cameras = [camHUD];
+				songPosBar.cameras = [camHUD];
+		}
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
@@ -1203,7 +1273,6 @@ class PlayState extends MusicBeatState
 		healthBarBG.visible = !ClientPrefs.hideHud;
 		healthBarBG.xAdd = -4;
 		healthBarBG.yAdd = -4;
-		healthBarBG.alpha = 0;
 		add(healthBarBG);
 		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
 
@@ -1214,31 +1283,86 @@ class PlayState extends MusicBeatState
 		healthBar.visible = !ClientPrefs.hideHud;
 		healthBar.alpha = ClientPrefs.healthBarAlpha;
 		add(healthBar);
-		healthBar.alpha = 0;
 		healthBarBG.sprTracker = healthBar;
+
+		healthTxt = new FlxText(0, 0, 400, "X%", 32);
+		healthTxt.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		healthTxt.scrollFactor.set();
+		healthTxt.borderSize = 2;
+		healthTxt.size = 20;
+		healthTxt.screenCenter(Y);
+		healthTxt.x = healthBar.x - 75;
+		healthTxt.visible = true;
 
 		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.hideHud;
 		iconP1.alpha = ClientPrefs.healthBarAlpha;
-		iconP1.alpha = 0;
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.hideHud;
 		iconP2.alpha = ClientPrefs.healthBarAlpha;
-		iconP2.alpha = 0;
 		add(iconP2);
-		reloadHealthBarColors();
+		reloadHealthBarColors(); 
 
-		scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud;
-		scoreTxt.alpha = 0;
-		add(scoreTxt);
+		switch(ClientPrefs.ui){
+			case 'HaxeLua':
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+			case 'Psych':
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+			case 'Kade':
+				scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
+				scoreTxt.screenCenter(X);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.y = healthBarBG.y;
+				add(scoreTxt);
+			case 'Yoshi':
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+			case 'Forever':
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+			case 'Andromeda':
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+			case 'Vanilla':
+				scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + 30, 0, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT);
+				scoreTxt.scrollFactor.set();
+				add(scoreTxt);
+			case "Mic'd Up":
+				scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+				scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				scoreTxt.scrollFactor.set();
+				scoreTxt.borderSize = 1.25;
+				scoreTxt.visible = !ClientPrefs.hideHud;
+				add(scoreTxt);
+		}
 
 		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -2362,31 +2486,59 @@ class PlayState extends MusicBeatState
 
 	public function updateScore(miss:Bool = false)
 	{
-		switch (SONG.song.toLowerCase()) //ass code
-		{
-			case 'senpai' | 'roses' | 'thorns':
-				scoreTxt.text = 'Less Bitches: ' + songMisses
-				+ ' | Chance Of Getting Bitches: '
-				+ Math.floor(ratingPercent * 100) + '%';
-			default:
+		switch(ClientPrefs.ui){
+			case 'HaxeLua':
 				scoreTxt.text = 'Score: ' + songScore
 				+ ' | Combo Breaks: ' + songMisses
 				+ ' | Accuracy: '
 				+ Math.floor(ratingPercent * 100) + '%';
-		}
 
-		if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
-		{
-			if(scoreTxtTween != null) {
-				scoreTxtTween.cancel();
-			}
-			scoreTxt.scale.x = 1.075;
-			scoreTxt.scale.y = 1.075;
-			scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
-				onComplete: function(twn:FlxTween) {
-					scoreTxtTween = null;
-				}
-			});
+				if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
+					{
+						if(scoreTxtTween != null) {
+							scoreTxtTween.cancel();
+						}
+						scoreTxt.scale.x = 1.75;
+						scoreTxt.scale.y = 0.75;
+						scoreTxt.angle += 7;
+						scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.1, {
+							onComplete: function(twn:FlxTween) {
+								scoreTxtTween = null;
+							}
+						});
+						scoreTxtTween2 = FlxTween.tween(scoreTxt, {angle: 0}, 0.1, {
+							onComplete: function(twn:FlxTween) {
+								scoreTxtTween = null;
+							}
+						});
+					}
+
+			case 'Psych':
+				scoreTxt.text = 'Score: ' + songScore
+				+ ' | Misses: ' + songMisses
+				+ ' | Rating: ' + ratingName
+				+ (ratingName != '?' ? ' (${Highscore.floorDecimal(ratingPercent * 100, 2)}%) - $ratingFC' : '');
+			
+				if(ClientPrefs.scoreZoom && !miss && !cpuControlled)
+					{
+						if(scoreTxtTween != null) {
+							scoreTxtTween.cancel();
+						}
+						scoreTxt.scale.x = 1.075;
+						scoreTxt.scale.y = 1.075;
+						scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
+							onComplete: function(twn:FlxTween) {
+								scoreTxtTween = null;
+							}
+						});
+					}
+			case 'Kade':
+				scoreTxt.text = 'Score:' + songScore 
+				+ ' | Combo Breaks:' + songMisses 
+				+ ' | Accuracy:' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%' 
+				+ ' | ' + ratingFC;
+			case 'Vanilla':
+				scoreTxt.text = 'Score:' + songScore; // im serious thats fucking it. \\
 		}
 	}
 
@@ -2448,77 +2600,10 @@ class PlayState extends MusicBeatState
 			vocals.pause();
 		}
 
-		creditsText = new FlxTypedGroup<FlxText>();
-		//in here, specify your song name and then its credits, then go to the next switch
-		switch(SONG.song.toLowerCase())
-		{
-			default:
-				box = new FlxSprite(0, -1000).loadGraphic(Paths.image("box"));
-				box.cameras = [camHUD];
-				box.setGraphicSize(Std.int(box.height * 0.8));
-				box.screenCenter(X);
-				add(box);
-
-				var texti:String;
-				var size:String;
-
-				if (FileSystem.exists(Paths.json(curSong.toLowerCase() + "/credits")))
-				{
-					texti = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("TIME")[0];
-					size = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("SIZE")[1];
-				}
-				else
-				{
-					texti = "CREDITS\nunfinished";
-					size = '28';
-				}
-
-				creditoText = new FlxText(0, -1000, 0, texti, 28);
-				creditoText.cameras = [camHUD];
-				creditoText.setFormat(Paths.font("PressStart2P.ttf"), Std.parseInt(size), FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				creditoText.setGraphicSize(Std.int(creditoText.width * 0.8));
-				creditoText.updateHitbox();
-				creditoText.x += 515;
-				creditsText.add(creditoText);
-		}
-		add(creditsText);
-
-		//this is the timing of the box coming in, specify your song and IF NEEDED, change the amount of time it takes to come in
-		//if you want to add it to start at the beginning of the song, type " | ", then add your song name
-		//poop fart ahahahahahah
-		switch (SONG.song.toLowerCase())
-		{
-			default:
-				var timei:String;
-
-				if (FileSystem.exists(Paths.json(curSong.toLowerCase() + "/credits")))
-				{
-					timei = File.getContent((Paths.json(curSong.toLowerCase() + "/credits"))).split("TIME")[1];
-				}
-				else
-				{
-					timei = "2.35";
-				}
-
-				FlxG.log.add('BTW THE TIME IS ' + Std.parseFloat(timei));
-
-				new FlxTimer().start(Std.parseFloat(timei), function(tmr:FlxTimer)
-					{
-						tweencredits();
-					});
-		}
-
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-
-		FlxTween.tween(healthBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(healthBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(iconP1, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(iconP2, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-
-		FlxTween.tween(scoreTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
 		switch(curStage)
 		{
@@ -2716,24 +2801,6 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 		generatedMusic = true;
 	}
-
-	function tweencredits()
-		{
-			FlxTween.tween(creditoText, {y: FlxG.height - 625}, 0.5, {ease: FlxEase.circOut});
-			FlxTween.tween(box, {y: 0}, 0.5, {ease: FlxEase.circOut});
-			//tween away
-			new FlxTimer().start(3, function(tmr:FlxTimer)
-				{
-					FlxTween.tween(creditoText, {y: -1000}, 0.5, {ease: FlxEase.circOut});
-					FlxTween.tween(box, {y: -1000}, 0.5, {ease: FlxEase.circOut});
-					//removal
-					new FlxTimer().start(0.5, function(tmr:FlxTimer)
-						{
-							remove(creditsText);
-							remove(box);
-						});
-				});
-		}
 
 	function eventPushed(event:EventNote) {
 		switch(event.event) {
@@ -3033,6 +3100,15 @@ class PlayState extends MusicBeatState
 		callOnLuas('onUpdate', [elapsed]);
 		callOnHScripts('update', [elapsed]);
 
+		if(ClientPrefs.ui == 'Kade' || ClientPrefs.ui == 'Vanilla'){
+			healthBar.createFilledBar(0xFFFF0000,0xFF66FF33);
+			healthBar.updateBar();
+		}else{
+			healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
+			FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+			healthBar.updateBar();
+		}
+
 		switch (curStage)
 		{
 			case 'tank':
@@ -3202,16 +3278,23 @@ class PlayState extends MusicBeatState
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
 
-		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
-		iconP1.scale.set(mult, mult);
-		iconP1.updateHitbox();
-
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
-		iconP2.scale.set(mult, mult);
-		iconP2.updateHitbox();
-
 		var iconOffset:Int = 26;
 
+		if(ClientPrefs.ui == 'Kade' || ClientPrefs.ui == 'Forever' || ClientPrefs.ui == 'Vanilla'){
+			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50)));
+			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.50)));
+	
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();	
+		}else{
+			var mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
+			iconP1.scale.set(mult, mult);
+			iconP1.updateHitbox();
+	
+			var mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
+			iconP2.scale.set(mult, mult);
+			iconP2.updateHitbox();
+		}
 		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
 		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 
@@ -3297,6 +3380,7 @@ class PlayState extends MusicBeatState
 					if (curTime < 0)
 						curTime = 0;
 					songPercent = (curTime / songLength);
+					songPositionBar = (curTime / songLength);
 
 					var songCalc:Float = (songLength - curTime);
 						songCalc = curTime;
@@ -4319,6 +4403,13 @@ for (key => value in luaShaders)
 		eventNotes = [];
 	}
 
+	function truncateFloat( number : Float, precision : Int): Float {
+		var num = number;
+		num = num * Math.pow(10, precision);
+		num = Math.round( num ) / Math.pow(10, precision);
+		return num;
+	}
+
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0;
 
@@ -4398,6 +4489,32 @@ for (key => value in luaShaders)
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
+		var msTiming = truncateFloat(noteDiff, 3);
+		if(cpuControlled) msTiming = 0;
+
+		if (currentTimingShown != null)
+			remove(currentTimingShown);
+
+		currentTimingShown = new FlxText(0,0,0,"0ms");
+		timeShown = 0;
+		currentTimingShown.borderStyle = OUTLINE;
+		currentTimingShown.borderSize = 1;
+		currentTimingShown.borderColor = FlxColor.BLACK;
+		currentTimingShown.text = msTiming + "ms";
+		currentTimingShown.color = FlxColor.CYAN;
+		currentTimingShown.size = 20;
+
+		if(ClientPrefs.ui == 'Kade'){
+			add(currentTimingShown);
+		}
+		
+		currentTimingShown.updateHitbox();
+		currentTimingShown.cameras = [camHUD];
+
+		if (currentTimingShown.alpha != 1)
+			currentTimingShown.alpha = 1;
+
+
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
 		comboSpr.cameras = [camHUD];
 		comboSpr.screenCenter();
@@ -4409,6 +4526,13 @@ for (key => value in luaShaders)
 		comboSpr.y -= ClientPrefs.comboOffset[1];
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
+
+		currentTimingShown.screenCenter();
+		currentTimingShown.x = comboSpr.x + 100;
+		currentTimingShown.y = rating.y + 100;
+		currentTimingShown.acceleration.y = 600 * playbackRate;
+		currentTimingShown.velocity.y -= 150 * playbackRate;
+	
 
 		insert(members.indexOf(strumLineNotes), rating);
 
@@ -4494,20 +4618,50 @@ for (key => value in luaShaders)
 		coolText.text = Std.string(seperatedScore);
 		// add(coolText);
 
-		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
-			startDelay: Conductor.crochet * 0.001 / playbackRate
+		if(ClientPrefs.ui == 'Kade'){
+		FlxTween.tween(rating, {alpha: 0}, 0.2, {
+			startDelay: Conductor.crochet * 0.001,
+			onUpdate: function(tween:FlxTween)
+			{
+				if (currentTimingShown != null)
+					currentTimingShown.alpha -= 0.02;
+				timeShown++;
+			}
 		});
 
-		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
+		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
 			onComplete: function(tween:FlxTween)
 			{
 				coolText.destroy();
 				comboSpr.destroy();
-
+				if (currentTimingShown != null && timeShown >= 20)
+				{
+					remove(currentTimingShown);
+					currentTimingShown = null;
+				}
 				rating.destroy();
 			},
-			startDelay: Conductor.crochet * 0.002 / playbackRate
+			startDelay: Conductor.crochet * 0.001
 		});
+	}else{
+		FlxTween.tween(rating, {alpha: 0}, 0.2, {
+			startDelay: Conductor.crochet * 0.001,
+			onUpdate: function(tween:FlxTween)
+			{
+				timeShown++;
+			}
+		});
+
+		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
+			onComplete: function(tween:FlxTween)
+			{
+				coolText.destroy();
+				comboSpr.destroy();
+				rating.destroy();
+			},
+			startDelay: Conductor.crochet * 0.001
+		});
+	}
 	}
 
 	private function onKeyPress(event:KeyboardEvent):Void
@@ -5228,96 +5382,38 @@ for (key => value in luaShaders)
 			return;
 		}
 
-		if(ClientPrefs.iconBounce == 'Spongebob Parodies'){
-				if (curBeat % 1 == 0) {
-					if(health > 1.6){
-						iconP1.angle -= 10;
-						iconP2.angle += 0;
-						FlxTween.angle(iconP1, 0, 0, 0, {ease: FlxEase.linear});
-					}else if(health < 0.4){
-						iconP2.angle -= 10;
-						iconP1.angle += 0;
-						FlxTween.angle(iconP2, 0, 0, 0, {ease: FlxEase.linear});
-					}else{
-						iconP1.angle -= 10;
-						iconP2.angle -= 10;
-						FlxTween.angle(iconP1, 0, 0, 0, {ease: FlxEase.linear});
-						FlxTween.angle(iconP2, 0, 0, 0, {ease: FlxEase.linear});
-							}
-				}
-				if (curBeat % 2 == 0) {
-					if(health > 1.6){
-						iconP1.angle -= 15;
-						iconP2.angle += 0;
-						FlxTween.angle(iconP1, 0, 0, 0, {ease: FlxEase.linear});
-					}else if(health < 0.4){
-						iconP2.angle -= 15;
-						iconP1.angle += 0;
-						FlxTween.angle(iconP2, 0, 0, 0, {ease: FlxEase.linear});
-					}else{
-						iconP1.angle -= 15;
-						iconP2.angle += 15;
-						FlxTween.angle(iconP1, 0, 0, 0, {ease: FlxEase.linear});
-						FlxTween.angle(iconP2, 0, 0, 0, {ease: FlxEase.linear});
-				}
-			}
+		danceLeft = !danceLeft;
+		
+		if(ClientPrefs.ui == 'Psych' || ClientPrefs.ui == 'Yoshi' || ClientPrefs.ui == 'Andromeda' || ClientPrefs.ui == "Mic'd Up"){
 			iconP1.scale.set(1.2, 1.2);
 			iconP2.scale.set(1.2, 1.2);
-
+			
 			iconP1.updateHitbox();
 			iconP2.updateHitbox();
-		}
-
-		switch(ClientPrefs.iconBounce){
-			case 'Golden Apple':
-				if (curBeat % gfSpeed == 0) {
-					curBeat % (gfSpeed * 2) == 0 ? {
-						FlxTween.tween(iconP1, {'scale.x': 1.1, 'scale.y': 0.8}, 0.01, {ease: FlxEase.quadOut});
-						FlxTween.tween(iconP2, {'scale.x': 1.1, 'scale.y': 2.3}, 0.01, {ease: FlxEase.quadOut});
-
-						FlxTween.angle(iconP1, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-						FlxTween.angle(iconP2, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-					} : {
-						FlxTween.tween(iconP2, {'scale.x': 1.1, 'scale.y': 0.8}, 0.01, {ease: FlxEase.quadOut});
-						FlxTween.tween(iconP1, {'scale.x': 1.1, 'scale.y': 2.1}, 0.01, {ease: FlxEase.quadOut});
-
-						FlxTween.angle(iconP2, -15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-						FlxTween.angle(iconP1, 15, 0, Conductor.crochet / 1300 * gfSpeed, {ease: FlxEase.quadOut});
-					}
-
-					FlxTween.tween(iconP1, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-					FlxTween.tween(iconP2, {'scale.x': 1, 'scale.y': 1}, Conductor.crochet / 1250 * gfSpeed, {ease: FlxEase.quadOut});
-
-					iconP1.updateHitbox();
-					iconP2.updateHitbox();
-				}
-				case 'OS':
-					if (curBeat % gfSpeed == 0) {
-						curBeat % (gfSpeed * 2) == 0 ? {
-							iconP1.angle = 15;
-							iconP2.angle = 15;
-						} : {
-							iconP1.angle = -15;
-							iconP2.angle = -15;
-						}
-						iconP1.scale.set(1.2, 1.2);
-						iconP2.scale.set(1.2, 1.2);
-	
-						iconP1.updateHitbox();
-						iconP2.updateHitbox();
-					}
-			case 'Default':
-				iconP1.scale.set(1.2, 1.2);
-				iconP2.scale.set(1.2, 1.2);
-		
-				iconP1.updateHitbox();
-				iconP2.updateHitbox();
-			default:
-				iconP1.scale.set(1.2, 1.2);
-				iconP2.scale.set(1.2, 1.2);
-		
-				iconP1.updateHitbox();
-				iconP2.updateHitbox();
+		}else if(ClientPrefs.ui == 'Kade' || ClientPrefs.ui == 'Vanilla'){
+			if(danceLeft){
+				iconP1.setGraphicSize(Std.int(iconP1.width + 4));
+				iconP2.setGraphicSize(Std.int(iconP2.width + 4));
+			}else{
+				iconP1.setGraphicSize(Std.int(iconP1.width + 30));
+				iconP2.setGraphicSize(Std.int(iconP2.width + 30));
+			}
+			
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
+		}else if(ClientPrefs.ui == 'HaxeLua'){
+			if (danceLeft){
+				iconP1.scale.set(1.4, 1.4);
+				iconP2.scale.set(0.7, 0.7);
+				//trace("beat Left");
+			}else{
+				iconP2.scale.set(1.4, 1.4);
+				iconP1.scale.set(0.7, 0.7);
+				//trace("beat Right");
+			}
+			
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
 		}
 
 		if (generatedMusic)
@@ -5526,7 +5622,7 @@ for (key => value in luaShaders)
 		var ret:Dynamic = callOnLuas('onRecalculateRating', [], false);
 		if(ret != FunkinLua.Function_Stop)
 		{
-			if(totalPlayed < 1) //Prevent divide by 0
+			if(totalPlayed < 1)//Prevent divide by 0
 				ratingName = '?';
 			else
 			{

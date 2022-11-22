@@ -56,12 +56,22 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
 		addOption(option);
 
-		var option:Option = new Option('Icon Bounce:',
-			"What should the Icons Bounce Like?",
-			'iconBounce',
+		var option:Option = new Option('HUD UI:',
+			"What should the Hud UI Look Like?\n(THIS DOESN'T AFFECT THE ACCURACY)",
+			'ui',
 			'string',
-			'Default',
-			['Default', 'Golden Apple', 'Spongebob Parodies', 'OS']);
+			'HaxeLua',
+			['HaxeLua', 'Psych', 'Kade', 'Yoshi', 'Forever', 'Andromeda', 'Vanilla', "Mic'd Up"]);
+		addOption(option);
+
+		var option:Option = new Option('Note Size',
+			'Set Note Size',
+			'noteSize',
+			'float',
+			0.7);
+			option.minValue = 0.4;
+			option.maxValue = 2;
+			option.changeValue = 0.1;
 		addOption(option);
 
 		var option:Option = new Option('Flashing Lights',

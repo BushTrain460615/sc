@@ -52,6 +52,7 @@ import Discord;
 import WindowsAPI;
 import lime.app.Application;
 import lime.ui.Window;
+import flixel.addons.display.FlxBackdrop;
 
 using StringTools;
 
@@ -199,6 +200,7 @@ class FunkinLua {
 		set('noResetButton', ClientPrefs.noReset);
 		set('lowQuality', ClientPrefs.lowQuality);
 		set('scriptName', scriptName);
+		set('hudUI', ClientPrefs.ui);
 
 		#if windows
 		set('buildTarget', 'windows');

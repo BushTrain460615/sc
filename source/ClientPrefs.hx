@@ -10,7 +10,8 @@ class ClientPrefs {
 	public static var timerSongName:Bool = false;
 	public static var splash:Bool = false;
 	public static var fullScreen:Bool = false;
-	public static var iconBounce:String = 'Default';
+	public static var ui:String = 'HaxeLua';
+	public static var noteSize:Float = 0.7;
 	
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
@@ -100,7 +101,8 @@ class ClientPrefs {
 	public static function saveSettings() {
 		FlxG.save.data.splash = splash;
 		FlxG.save.data.fullScreen = fullScreen;
-		FlxG.save.data.iconBounce = iconBounce;
+		FlxG.save.data.ui = ui;
+		FlxG.save.data.noteSize = noteSize;
 
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
@@ -154,8 +156,11 @@ class ClientPrefs {
 		if(FlxG.save.data.fullScreen != null) {
 			fullScreen = FlxG.save.data.fullScreen;
 		}
-		if(FlxG.save.data.iconBounce != null) {
-			iconBounce = FlxG.save.data.iconBounce;
+		if(FlxG.save.data.ui != null) {
+			ui = FlxG.save.data.ui;
+		}
+		if(FlxG.save.data.noteSize != null) {
+			noteSize = FlxG.save.data.noteSize;
 		}
 
 		if(FlxG.save.data.downScroll != null) {
