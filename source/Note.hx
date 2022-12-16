@@ -1,5 +1,7 @@
 package;
 
+import flixel.math.FlxPoint;
+import math.Vector3;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -19,6 +21,16 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	override function destroy()
+	{
+		defScale.put();
+		super.destroy();
+	}	
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
 	public var extraData:Map<String,Dynamic> = [];
 
 	public var strumTime:Float = 0;
@@ -107,6 +119,7 @@ class Note extends FlxSprite
 		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
 		{
 			scale.y *= ratio;
+			defScale.copyFrom(scale);
 			updateHitbox();
 		}
 	}
@@ -232,11 +245,13 @@ class Note extends FlxSprite
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
 				prevNote.updateHitbox();
+				prevNote.defScale.copyFrom(prevNote.scale);
 				// prevNote.setGraphicSize();
 			}
 
 			if(PlayState.isPixelStage) {
 				scale.y *= PlayState.daPixelZoom;
+				defScale.copyFrom(scale);
 				updateHitbox();
 			}
 		} else if(!isSustainNote) {
@@ -307,6 +322,7 @@ class Note extends FlxSprite
 		}
 		if(isSustainNote) {
 			scale.y = lastScaleY;
+			defScale.copyFrom(scale);
 		}
 		updateHitbox();
 
