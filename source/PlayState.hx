@@ -2112,7 +2112,9 @@ class PlayState extends MusicBeatState
 			}
 
 			modManager.receptors = [playerStrums.members, opponentStrums.members];
+			callOnLuas('preModifierRegister', []);
 			modManager.registerDefaultModifiers();
+			callOnLuas('postModifierRegister', []);
 			//Modcharts.loadModchart(modManager, SONG.song);
 			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;

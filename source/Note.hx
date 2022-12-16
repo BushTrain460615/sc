@@ -81,6 +81,9 @@ class Note extends FlxSprite
 	public var noteSplashSat:Float = 0;
 	public var noteSplashBrt:Float = 0;
 
+	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
+	public var typeOffsetY:Float = 0;
+
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
@@ -251,12 +254,12 @@ class Note extends FlxSprite
 
 			if(PlayState.isPixelStage) {
 				scale.y *= PlayState.daPixelZoom;
-				defScale.copyFrom(scale);
 				updateHitbox();
 			}
 		} else if(!isSustainNote) {
 			earlyHitMult = 1;
 		}
+		defScale.copyFrom(scale);
 		x += offsetX;
 	}
 
@@ -322,8 +325,8 @@ class Note extends FlxSprite
 		}
 		if(isSustainNote) {
 			scale.y = lastScaleY;
-			defScale.copyFrom(scale);
 		}
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if(animName != null)

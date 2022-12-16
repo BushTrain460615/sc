@@ -35,13 +35,13 @@ class ReverseModifier extends NoteModifier {
 
         if(dir>=first && dir<=last)
             val += getSubmodValue("cross" + suffix,player);
-
+        
 
         if(suffix=='')
             val += getValue(player) + getSubmodValue("reverse" + Std.string(dir),player);
         else
             val += getSubmodValue("reverse" + suffix,player);
-
+        
 
         if(getSubmodValue("unboundedReverse",player)==0){
             val %=2;
@@ -65,7 +65,7 @@ class ReverseModifier extends NoteModifier {
 
 	override function ignoreUpdateNote()
 		return false;
-
+    
 	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
 	{
 		if (daNote.isSustainNote)
@@ -146,8 +146,9 @@ class ReverseModifier extends NoteModifier {
         var subMods:Array<String> = ["cross", "split", "alternate", "reverseScroll", "crossScroll", "splitScroll", "alternateScroll", "centered", "unboundedReverse"];
 
         var receptors = modMgr.receptors[0];
-        for(recep in receptors){
-            subMods.push('reverse${recep.noteData}');
+		for (i in 0...4)
+		{
+            subMods.push('reverse${i}');
         }
         return subMods;
     }

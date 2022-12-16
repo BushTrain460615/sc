@@ -60,6 +60,7 @@ class PerspectiveModifier extends NoteModifier {
     var a = (near+far)/(near-far);
     var b = 2*near*far/(near-far);
     var z = (a*shit+b);
+    //trace(shit, curZ, z, x/z, y/z);
     var returnedVector = new Vector3(x/z,y/z,z).add(halfOffset);
 
     return returnedVector;
@@ -70,20 +71,21 @@ class PerspectiveModifier extends NoteModifier {
     var vec = getVector(receptor.z,pos);
     pos.x=vec.x;
     pos.y=vec.y;
+
     return pos;
   }*/
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
     return getVector(pos.z,pos);
-
+  
 
 	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
     receptor.scale.scale(1/pos.z);
   }
-
+  
 
 	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
     note.scale.scale(1/pos.z);
   }
-
+  
 
 }
