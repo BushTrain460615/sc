@@ -324,7 +324,11 @@ class Paths
 	}
 
 	inline static public function formatToSongPath(path:String) {
-		return path.toLowerCase().replace(' ', '-');
+		var invalidChars = ~/[~&\\;:<>#]/;
+		var hideChars = ~/[.,'"%?!]/;
+
+		var path = invalidChars.split(path.replace(' ', '-')).join("-");
+		return hideChars.split(path).join("").toLowerCase();
 	}
 
 	// completely rewritten asset loading? fuck!
@@ -355,7 +359,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		trace('oh no ' + key + ' is returning null NOOOO');
+		trace('oh no its returning null NOOOO');
 		return null;
 	}
 
@@ -423,6 +427,8 @@ class Paths
 		return modFolders('images/' + key + '.txt');
 	}
 
+	/* Goes unused for now
+
 	inline static public function modsShaderFragment(key:String, ?library:String)
 	{
 		return modFolders('shaders/'+key+'.frag');
@@ -431,8 +437,6 @@ class Paths
 	{
 		return modFolders('shaders/'+key+'.vert');
 	}
-	
-	/* Goes unused for now
 	inline static public function modsAchievements(key:String) {
 		return modFolders('achievements/' + key + '.json');
 	}*/

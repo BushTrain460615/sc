@@ -56,24 +56,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
 		addOption(option);
 
-		var option:Option = new Option('HUD UI:',
-			"What should the Hud UI Look Like?\n(THIS DOESN'T AFFECT THE ACCURACY)",
-			'ui',
-			'string',
-			'HaxeLua',
-			['HaxeLua', 'Psych', 'Kade', 'Yoshi', 'Forever', 'Andromeda', 'Vanilla', "Mic'd Up"]);
-		addOption(option);
-
-		var option:Option = new Option('Note Size',
-			'Set Note Size',
-			'noteSize',
-			'float',
-			0.7);
-			option.minValue = 0.4;
-			option.maxValue = 2;
-			option.changeValue = 0.1;
-		addOption(option);
-
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
 			'flashing',
@@ -134,6 +116,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 		#end
+
+		var option:Option = new Option('Combo Stacking',
+			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
+			'comboStacking',
+			'bool',
+			true);
+		addOption(option);
 
 		super();
 	}

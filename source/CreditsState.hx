@@ -81,8 +81,6 @@ class CreditsState extends MusicBeatState
 		#end
 
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			['Credits.. Yay..'],
-			['Jinx',		'shubs',		'ONLY Programmer for This Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
 			['RiverOaken',			'river',			'Main Artist/Animator of Psych Engine',							'https://twitter.com/RiverOaken',		'B42F71'],
@@ -94,6 +92,7 @@ class CreditsState extends MusicBeatState
 			['Engine Contributors'],
 			['iFlicky',				'flicky',			'Composer of Psync and Tea Time\nMade the Dialogue Sounds',		'https://twitter.com/flicky_i',			'9E29CF'],
 			['SqirraRNG',			'sqirra',			'Crash Handler and Base code for\nChart Editor\'s Waveform',	'https://twitter.com/gedehari',			'E1843A'],
+			['EliteMasterEric',		'mastereric',		'Runtime Shaders support',										'https://twitter.com/EliteMasterEric',	'FFBD40'],
 			['PolybiusProxy',		'proxy',			'.MP4 Video Loader Library (hxCodec)',							'https://twitter.com/polybiusproxy',	'DCD294'],
 			['KadeDev',				'kade',				'Fixed some cool stuff on Chart Editor\nand other PRs',			'https://twitter.com/kade0912',			'64A250'],
 			['Keoiki',				'keoiki',			'Note Splash Animations',										'https://twitter.com/Keoiki_',			'D2D2D2'],
@@ -114,16 +113,11 @@ class CreditsState extends MusicBeatState
 		for (i in 0...creditsStuff.length)
 		{
 			var isSelectable:Bool = !unselectableCheck(i);
-			var optionText:Alphabet = new Alphabet(0, 70 * i, creditsStuff[i][0], !isSelectable, false);
+			var optionText:Alphabet = new Alphabet(FlxG.width / 2, 300, creditsStuff[i][0], !isSelectable);
 			optionText.isMenuItem = true;
-			optionText.screenCenter(X);
-			optionText.yAdd -= 70;
-			if(isSelectable) {
-				optionText.x -= 70;
-			}
-			optionText.forceX = optionText.x;
-			//optionText.yMult = 90;
 			optionText.targetY = i;
+			optionText.changeX = false;
+			optionText.snapToPosition();
 			grpOptions.add(optionText);
 
 			if(isSelectable) {
@@ -143,6 +137,7 @@ class CreditsState extends MusicBeatState
 
 				if(curSelected == -1) curSelected = i;
 			}
+			else optionText.alignment = CENTERED;
 		}
 		
 		descBox = new AttachedSprite();
@@ -187,12 +182,12 @@ class CreditsState extends MusicBeatState
 
 				if (upP)
 				{
-					changeSelection(-1 * shiftMult);
+					changeSelection(-shiftMult);
 					holdTime = 0;
 				}
 				if (downP)
 				{
-					changeSelection(1 * shiftMult);
+					changeSelection(shiftMult);
 					holdTime = 0;
 				}
 
@@ -225,7 +220,7 @@ class CreditsState extends MusicBeatState
 		
 		for (item in grpOptions.members)
 		{
-			if(!item.isBold)
+			if(!item.bold)
 			{
 				var lerpVal:Float = CoolUtil.boundTo(elapsed * 12, 0, 1);
 				if(item.targetY == 0)
@@ -233,12 +228,10 @@ class CreditsState extends MusicBeatState
 					var lastX:Float = item.x;
 					item.screenCenter(X);
 					item.x = FlxMath.lerp(lastX, item.x - 70, lerpVal);
-					item.forceX = item.x;
 				}
 				else
 				{
 					item.x = FlxMath.lerp(item.x, 200 + -40 * Math.abs(item.targetY), lerpVal);
-					item.forceX = item.x;
 				}
 			}
 		}

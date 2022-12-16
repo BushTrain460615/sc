@@ -16,7 +16,6 @@ typedef StageFile = {
 	var directory:String;
 	var defaultZoom:Float;
 	var isPixelStage:Bool;
-	var isBorderless:Bool;
 
 	var boyfriend:Array<Dynamic>;
 	var girlfriend:Array<Dynamic>;

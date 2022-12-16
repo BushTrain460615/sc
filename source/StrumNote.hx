@@ -54,13 +54,13 @@ class StrumNote extends FlxSprite
 			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
 
 			antialiasing = false;
-			setGraphicSize(Std.int(width * ClientPrefs.noteSize * PlayState.daPixelZoom));
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 
 			animation.add('green', [6]);
 			animation.add('red', [7]);
 			animation.add('blue', [5]);
 			animation.add('purple', [4]);
-			switch (Math.abs(noteData))
+			switch (Math.abs(noteData) % 4)
 			{
 				case 0:
 					animation.add('static', [0]);
@@ -89,9 +89,9 @@ class StrumNote extends FlxSprite
 			animation.addByPrefix('red', 'arrowRIGHT');
 
 			antialiasing = ClientPrefs.globalAntialiasing;
-			setGraphicSize(Std.int(width * ClientPrefs.noteSize));
+			setGraphicSize(Std.int(width * 0.7));
 
-			switch (Math.abs(noteData))
+			switch (Math.abs(noteData) % 4)
 			{
 				case 0:
 					animation.addByPrefix('static', 'arrowLEFT');
@@ -153,9 +153,12 @@ class StrumNote extends FlxSprite
 			colorSwap.saturation = 0;
 			colorSwap.brightness = 0;
 		} else {
-			colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length)
+			{
+				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
+				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
+				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+			}
 
 			if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
 				centerOrigin();
