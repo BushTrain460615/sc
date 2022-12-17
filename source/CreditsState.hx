@@ -81,6 +81,15 @@ class CreditsState extends MusicBeatState
 		#end
 
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
+			['HaxeLua Engine Team'],
+			['Jinx',		'god',		'Main Programmer of HaxeLua Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
+			['RandoScripts',		'pornhub',		'Gave Suggestions For HaxeLua Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
+			[''],
+			['Credits I Must Give Before People Think Stuff I Made Which Is Not Mine'],
+			['KutikiPlayz',		'woah',		'Lots Of Shit',								'https://twitter.com/Shadow_Mario_',	'444444'],
+			['DMMaster636',		'sex',		'Pixel Note Splash',								'https://twitter.com/Shadow_Mario_',	'444444'],
+			['JustJasonLol',		'sex',		'Preloader and stuff',								'https://twitter.com/Shadow_Mario_',	'444444'],
+			[''],
 			['Psych Engine Team'],
 			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',								'https://twitter.com/Shadow_Mario_',	'444444'],
 			['RiverOaken',			'river',			'Main Artist/Animator of Psych Engine',							'https://twitter.com/RiverOaken',		'B42F71'],
