@@ -284,7 +284,7 @@ class Note extends FlxSprite
 				height = height / 5;
 				loadGraphic(Paths.image('pixelUI/' + blahblah), true, Math.floor(width), Math.floor(height));
 			}
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			setGraphicSize(Std.int(width * ClientPrefs.noteSize * PlayState.daPixelZoom));
 			loadPixelNoteAnims();
 			antialiasing = false;
 
@@ -329,7 +329,7 @@ class Note extends FlxSprite
 			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
 		}
 
-		setGraphicSize(Std.int(width * 0.7));
+		setGraphicSize(Std.int(width * ClientPrefs.noteSize));
 		updateHitbox();
 	}
 

@@ -47,6 +47,18 @@ class OptionsSubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
+
+		var option:Option = new Option('Note Sizing',
+			"Change the note size.",
+			'noteSize',
+			'float',
+			0.7);
+			option.scrollSpeed = 1;
+			option.minValue = 0.5;
+			option.maxValue = 3.0;
+			option.changeValue = 0.05;
+			option.decimals = 2;
+		addOption(option);
 	
 		// var option:Option = new Option('Time Bar:',
 		// 	"What should the Time Bar display?",
