@@ -41,7 +41,7 @@ class OptionsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Enable Camera Movement',
+		var option:Option = new Option('Enable Smooth Healthbar',
 			"If checked, health bar will be indie cross like.",
 			'smoothHealthBar',
 			'bool',
