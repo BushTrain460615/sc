@@ -7,6 +7,9 @@ import flixel.graphics.FlxGraphic;
 import Controls;
 
 class ClientPrefs {
+	public static var camMove:Bool = false;
+	public static var smoothHealthBar:Bool = true;
+
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var opponentStrums:Bool = true;
@@ -94,6 +97,9 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
+		FlxG.save.data.camMove = camMove;
+		FlxG.save.data.smoothHealthBar = smoothHealthBar;
+
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
@@ -141,6 +147,13 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.camMove != null) {
+			camMove = FlxG.save.data.camMove;
+		}
+		if(FlxG.save.data.smoothHealthBar != null) {
+			smoothHealthBar = FlxG.save.data.smoothHealthBar;
+		}
+
 		if(FlxG.save.data.downScroll != null) {
 			downScroll = FlxG.save.data.downScroll;
 		}

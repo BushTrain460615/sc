@@ -2701,9 +2701,9 @@ class PlayState extends MusicBeatState
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			if (!isStoryMode && !skipArrowStartTween)
 			{
-				//babyArrow.y -= 10;
+				babyArrow.y -= 10;
 				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {/*y: babyArrow.y + 10,*/ alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+				FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
 			else
 			{
@@ -2873,10 +2873,48 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		/*if (FlxG.keys.justPressed.NINE)
+		if (FlxG.keys.justPressed.NINE)
 		{
 			iconP1.swapOldIcon();
-		}*/
+		}
+		if(!ClientPrefs.camMove){
+			if (!SONG.notes[curSection].mustHitSection)
+			{
+				if(dad.animation.curAnim.name.startsWith("singLEFT")){
+					camFollow.set(dad.getMidpoint().x - 20, dad.getMidpoint().y);
+				}
+				if(dad.animation.curAnim.name.startsWith("singRIGHT")){
+					camFollow.set(dad.getMidpoint().x + 20, dad.getMidpoint().y);
+				}
+				if(dad.animation.curAnim.name.startsWith("singUP")){
+					camFollow.set(dad.getMidpoint().x, dad.getMidpoint().y - 20);
+				}
+				if(dad.animation.curAnim.name.startsWith("singDOWN")){
+					camFollow.set(dad.getMidpoint().x, dad.getMidpoint().y + 20);
+				}
+				if(dad.animation.curAnim.name.startsWith("idle") || dad.animation.curAnim.name.startsWith("idle")){
+					camFollow.set(dad.getMidpoint().x + 150, dad.getMidpoint().y + 150);
+				}
+			}
+			else
+			{
+				if(boyfriend.animation.curAnim.name.startsWith("singLEFT")){
+					camFollow.set(boyfriend.getMidpoint().x - 20, boyfriend.getMidpoint().y);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singRIGHT")){
+					camFollow.set(boyfriend.getMidpoint().x + 20, boyfriend.getMidpoint().y);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singUP")){
+					camFollow.set(boyfriend.getMidpoint().x, boyfriend.getMidpoint().y - 20);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singDOWN")){
+					camFollow.set(boyfriend.getMidpoint().x, boyfriend.getMidpoint().y + 20);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("idle") || boyfriend.animation.curAnim.name.startsWith("idle")){
+					camFollow.set(boyfriend.getMidpoint().x + 150, boyfriend.getMidpoint().y + 150);
+				}
+			}
+		}
 		callOnLuas('onUpdate', [elapsed]);
 
 		switch (curStage)
