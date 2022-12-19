@@ -167,10 +167,6 @@ class PlayState extends MusicBeatState
 	private static var prevCamFollow:FlxPoint;
 	private static var prevCamFollowPos:FlxObject;
 
-	private var camOrigin:Array<Float> = [0, 0]; //the value that the game uses so it doesnt fly off when two of the same notes are hit or if theres sustain notes :))) (its what camFollow used to be)
-	public var mustHitSection:Bool = false;
-	public var gfSection:Bool = false;
-	
 	public var strumLineNotes:FlxTypedGroup<StrumNote>;
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
@@ -180,7 +176,6 @@ class PlayState extends MusicBeatState
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
 	private var curSong:String = "";
-	var lerpedHealth:Float = 1;
 
 	public var gfSpeed:Int = 1;
 	public var health:Float = 1;
@@ -1129,13 +1124,8 @@ class PlayState extends MusicBeatState
 		add(healthBarBG);
 		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
 
-		if(ClientPrefs.smoothHealthBar){
-			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
-			'lerpedHealth', 0, 2);
-		}else{
-			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
+		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'health', 0, 2);
-		}
 		healthBar.scrollFactor.set();
 		// healthBar
 		healthBar.visible = !ClientPrefs.hideHud;
@@ -2711,9 +2701,9 @@ class PlayState extends MusicBeatState
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			if (!isStoryMode && !skipArrowStartTween)
 			{
-				babyArrow.y -= 10;
+				//babyArrow.y -= 10;
 				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+				FlxTween.tween(babyArrow, {/*y: babyArrow.y + 10,*/ alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
 			else
 			{
@@ -2883,13 +2873,10 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		if(ClientPrefs.smoothHealthBar)
-			lerpedHealth = FlxMath.lerp(lerpedHealth, health, CoolUtil.boundTo(elapsed * 20, 0, 1));
-
-		if (FlxG.keys.justPressed.NINE)
+		/*if (FlxG.keys.justPressed.NINE)
 		{
 			iconP1.swapOldIcon();
-		}
+		}*/
 		callOnLuas('onUpdate', [elapsed]);
 
 		switch (curStage)
@@ -3071,31 +3058,21 @@ class PlayState extends MusicBeatState
 
 		var iconOffset:Int = 26;
 
-		if(ClientPrefs.smoothHealthBar){
-			var percent:Float = 1 - (lerpedHealth / 2);
-			iconP1.x = healthBar.x + (healthBar.width * percent) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-			iconP2.x = healthBar.x + (healthBar.width * percent) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
-		}else{
-			iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-			iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
-		}
+		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 
 		if (health > 2)
 			health = 2;
 
 		if (healthBar.percent < 20)
-			iconP1.changeAnim(true);
-		else if (healthBar.percent > 80)
-			iconP1.changeAnim(false, true);
+			iconP1.animation.curAnim.curFrame = 1;
 		else
-			iconP1.changeAnim(false);
+			iconP1.animation.curAnim.curFrame = 0;
 
 		if (healthBar.percent > 80)
-			iconP2.changeAnim(true);
-		else if (healthBar.percent < 20)
-			iconP2.changeAnim(false, true);
+			iconP2.animation.curAnim.curFrame = 1;
 		else
-			iconP2.changeAnim(false);
+			iconP2.animation.curAnim.curFrame = 0;
 
 		if (FlxG.keys.anyJustPressed(debugKeysCharacter) && !endingSong && !inCutscene) {
 			persistentUpdate = false;
@@ -3707,21 +3684,19 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Screen Shake':
-				if(!ClientPrefs.screenShake){
-					var valuesArray:Array<String> = [value1, value2];
-					var targetsArray:Array<FlxCamera> = [camGame, camHUD];
-					for (i in 0...targetsArray.length) {
-						var split:Array<String> = valuesArray[i].split(',');
-						var duration:Float = 0;
-						var intensity:Float = 0;
-						if(split[0] != null) duration = Std.parseFloat(split[0].trim());
-						if(split[1] != null) intensity = Std.parseFloat(split[1].trim());
-						if(Math.isNaN(duration)) duration = 0;
-						if(Math.isNaN(intensity)) intensity = 0;
-	
-						if(duration > 0 && intensity != 0) {
-							targetsArray[i].shake(intensity, duration);
-						}
+				var valuesArray:Array<String> = [value1, value2];
+				var targetsArray:Array<FlxCamera> = [camGame, camHUD];
+				for (i in 0...targetsArray.length) {
+					var split:Array<String> = valuesArray[i].split(',');
+					var duration:Float = 0;
+					var intensity:Float = 0;
+					if(split[0] != null) duration = Std.parseFloat(split[0].trim());
+					if(split[1] != null) intensity = Std.parseFloat(split[1].trim());
+					if(Math.isNaN(duration)) duration = 0;
+					if(Math.isNaN(intensity)) intensity = 0;
+
+					if(duration > 0 && intensity != 0) {
+						targetsArray[i].shake(intensity, duration);
 					}
 				}
 
@@ -3861,57 +3836,29 @@ class PlayState extends MusicBeatState
 	var cameraTwn:FlxTween;
 	public function moveCamera(isDad:Bool)
 	{
-		if(!ClientPrefs.camMove){
-			if(isDad)
-				{
-					camOrigin = [dad.getMidpoint().x + 150, dad.getMidpoint().y - 100]; //changed this so that in the unlikley event that a note being hit while the camera is being moved makes the camorigin based off that offset?!?!?! idk if that made sense but yeah
-					camOrigin[0] -= dad.cameraPosition[0] + opponentCameraOffset[0];
-					camOrigin[1] += dad.cameraPosition[1] + opponentCameraOffset[1];
-					tweenCamIn();
-				}
-				else
-				{
-					camOrigin = [boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100];
-					camOrigin[0] -= boyfriend.cameraPosition[0] - boyfriendCameraOffset[0];
-					camOrigin[1] += boyfriend.cameraPosition[1] + boyfriendCameraOffset[1];
-		
-					if (Paths.formatToSongPath(SONG.song) == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1)
-					{
-						cameraTwn = FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut, onComplete:
-							function (twn:FlxTween)
-							{
-								cameraTwn = null;
-							}
-						});
-					}
-				}
-		}else{
-			if(isDad)
-				{
-					camFollow.set(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-					camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];
-					camFollow.y += dad.cameraPosition[1] + opponentCameraOffset[1];
-					tweenCamIn();
-				}
-				else
-				{
-					camFollow.set(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
-					camFollow.x -= boyfriend.cameraPosition[0] - boyfriendCameraOffset[0];
-					camFollow.y += boyfriend.cameraPosition[1] + boyfriendCameraOffset[1];
-		
-					if (Paths.formatToSongPath(SONG.song) == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1)
-					{
-						cameraTwn = FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut, onComplete:
-							function (twn:FlxTween)
-							{
-								cameraTwn = null;
-							}
-						});
-					}
-				}
+		if(isDad)
+		{
+			camFollow.set(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
+			camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];
+			camFollow.y += dad.cameraPosition[1] + opponentCameraOffset[1];
+			tweenCamIn();
 		}
-		if(!ClientPrefs.camMove)
-			camFollow.set(camOrigin[0], camOrigin[1]); //funy
+		else
+		{
+			camFollow.set(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
+			camFollow.x -= boyfriend.cameraPosition[0] - boyfriendCameraOffset[0];
+			camFollow.y += boyfriend.cameraPosition[1] + boyfriendCameraOffset[1];
+
+			if (Paths.formatToSongPath(SONG.song) == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1)
+			{
+				cameraTwn = FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut, onComplete:
+					function (twn:FlxTween)
+					{
+						cameraTwn = null;
+					}
+				});
+			}
+		}
 	}
 
 	function tweenCamIn() {
@@ -4676,22 +4623,6 @@ class PlayState extends MusicBeatState
 			{
 				char.playAnim(animToPlay, true);
 				char.holdTimer = 0;
-				if(!ClientPrefs.camMove){
-					if(!mustHitSection)
-						{ //the actual camera moving
-							switch(note.noteData) //i dont wanna use my brain to make a super cool solution!!!
-							{
-								case 0:
-									camFollow.set(camOrigin[0] - char.cameraMove, camOrigin[1]);
-								case 1:
-									camFollow.set(camOrigin[0], camOrigin[1] + char.cameraMove);
-								case 2:
-									camFollow.set(camOrigin[0], camOrigin[1] - char.cameraMove);
-								case 3:
-									camFollow.set(camOrigin[0] + char.cameraMove, camOrigin[1]);
-							}
-						}
-				}
 			}
 		}
 
@@ -4790,24 +4721,7 @@ class PlayState extends MusicBeatState
 						gf.specialAnim = true;
 						gf.heyTimer = 0.6;
 					}
-				}else if(!ClientPrefs.camMove){
-						var char:Character = note.gfNote ? gf : boyfriend;
-	
-						if(mustHitSection)
-						{ //the actual camera moving AGAIN
-							switch(note.noteData) //i dont wanna use my brain to make a super cool solution!!!
-							{
-								case 0:
-									camFollow.set(camOrigin[0] - char.cameraMove, camOrigin[1]);
-								case 1:
-									camFollow.set(camOrigin[0], camOrigin[1] + char.cameraMove);
-								case 2:
-									camFollow.set(camOrigin[0], camOrigin[1] - char.cameraMove);
-								case 3:
-									camFollow.set(camOrigin[0] + char.cameraMove, camOrigin[1]);
-							}
-						}
-					}
+				}
 			}
 
 			if(cpuControlled) {
@@ -5102,9 +5016,6 @@ class PlayState extends MusicBeatState
 
 	var lastBeatHit:Int = -1;
 
-	var idleAnims:Array<String> = ['idle', 'danceLeft', 'danceRight', 'hey']; //animations that can set the camera back to normal
-	//MAYBE SHOULD OF JUST MADE IT SO ALL ANIMATIONS THAT ARENT SING ANIMS CHANGE IT BACK TO NORMAL BUT IF YOU REALLY WANT THAT ADD IT YOURSELF
-
 	override function beatHit()
 	{
 		super.beatHit();
@@ -5128,32 +5039,14 @@ class PlayState extends MusicBeatState
 		if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
 		{
 			gf.dance();
-			if(!ClientPrefs.camMove){
-				for(i in 0...idleAnims.length) { //resets camera back to normal if is idling
-					if(gfSection && gf.animation.curAnim.name.startsWith(idleAnims[i]))
-						camFollow.set(camOrigin[0], camOrigin[1]);
-				}
-			}
 		}
 		if (curBeat % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
 		{
 			boyfriend.dance();
-			if(!ClientPrefs.camMove){
-				for(i in 0...idleAnims.length) {
-					if(mustHitSection && boyfriend.animation.curAnim.name.startsWith(idleAnims[i]))
-						camFollow.set(camOrigin[0], camOrigin[1]);
-				}
-			}
 		}
 		if (curBeat % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
 		{
 			dad.dance();
-			if(!ClientPrefs.camMove){
-				for(i in 0...idleAnims.length) {
-					if(!mustHitSection && dad.animation.curAnim.name.startsWith(idleAnims[i]))
-						camFollow.set(camOrigin[0], camOrigin[1]);
-				}
-			}
 		}
 
 		switch (curStage)
@@ -5243,9 +5136,6 @@ class PlayState extends MusicBeatState
 			setOnLuas('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnLuas('altAnim', SONG.notes[curSection].altAnim);
 			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
-
-			mustHitSection = SONG.notes[Math.floor(curStep / 16)].mustHitSection; //why isnt this a thing already
-			gfSection = SONG.notes[Math.floor(curStep / 16)].gfSection;
 		}
 		
 		setOnLuas('curSection', curSection);

@@ -1,6 +1,5 @@
 package;
 
-import options.OptionsState;
 import Controls.Control;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -21,7 +20,7 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Exit to menu'];
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
 
@@ -219,12 +218,6 @@ class PauseSubState extends MusicBeatSubstate
 					menuItems = difficultyChoices;
 					deleteSkipTimeText();
 					regenMenu();
-				case 'Options':
-					PlayState.seenCutscene = true;
-					OptionsState.fromPlayState = true;
-					MusicBeatState.switchState(new OptionsState());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
-					FlxG.sound.music.fadeIn(2, 0, 1);
 				case 'Toggle Practice Mode':
 					PlayState.instance.practiceMode = !PlayState.instance.practiceMode;
 					PlayState.changedDifficulty = true;

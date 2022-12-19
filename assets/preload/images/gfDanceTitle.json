@@ -6,6 +6,5 @@
 	"gfx":512,
 	"gfy":40,
 	"backgroundSprite":"",
-	"bpm":102,
-	"windowtitle": "Friday Night Funkin': HaxeLua Engine"
+	"bpm":102
 }

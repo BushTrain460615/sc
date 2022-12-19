@@ -1,3 +1,2 @@
-Put your custom songs and charts here.
-Similar to engines like Andromenda or Forever where the chart and Inst+Vocals are in the same file.
-Cleans it just a little
+Put your custom songs here
+It should be a folder with your custom song's name, and inside of it should include two files: "Inst.ogg" and "Voices.ogg"

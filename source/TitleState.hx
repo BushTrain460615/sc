@@ -35,7 +35,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.Assets;
-import openfl.Lib;
 
 using StringTools;
 typedef TitleData =
@@ -48,8 +47,7 @@ typedef TitleData =
 	gfx:Float,
 	gfy:Float,
 	backgroundSprite:String,
-	bpm:Int,
-	windowtitle:String
+	bpm:Int
 }
 class TitleState extends MusicBeatState
 {
@@ -272,8 +270,6 @@ class TitleState extends MusicBeatState
 		// bg.setGraphicSize(Std.int(bg.width * 0.6));
 		// bg.updateHitbox();
 		add(bg);
-
-		openfl.Lib.application.window.title = titleJSON.windowtitle;
 
 		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
@@ -612,9 +608,6 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		FlxG.camera.zoom = 1.03;
-		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.4, {ease: FlxEase.quadOut});
-
 		if(logoBl != null)
 			logoBl.animation.play('bump', true);
 
@@ -636,14 +629,16 @@ class TitleState extends MusicBeatState
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
 					#if PSYCH_WATERMARKS
-					createCoolText(['HaxeLua Engine by'], 15);
+					createCoolText(['Psych Engine by'], 15);
 					#else
 					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
 					#end
 				// credTextShit.visible = true;
 				case 4:
 					#if PSYCH_WATERMARKS
-					addMoreText('Jinx', 15);
+					addMoreText('Shadow Mario', 15);
+					addMoreText('RiverOaken', 15);
+					addMoreText('shubs', 15);
 					#else
 					addMoreText('present');
 					#end
