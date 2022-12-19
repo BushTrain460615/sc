@@ -59,6 +59,13 @@ class OptionsSubState extends BaseOptionsMenu
 			option.changeValue = 0.05;
 			option.decimals = 2;
 		addOption(option);
+
+		var option:Option = new Option('Disabled Screen Shaking',
+			"If checked, Screen Shake Event and Lua Camera Shake Event \n Will Not Shake The Screen. \n Looking at you The_Mayz_",
+			'screenShake',
+			'bool',
+			false);
+		addOption(option);
 	
 		// var option:Option = new Option('Time Bar:',
 		// 	"What should the Time Bar display?",

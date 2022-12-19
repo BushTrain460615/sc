@@ -130,8 +130,8 @@ class PlatformUtil
         SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)p.c_str(), SPIF_UPDATEINIFILE);
     ')
     #end
-   /* static public function updateWallpaper() {  // Only works on windows, otherwise returns 0!
+    static public function updateWallpaper() {  // Only works on windows, otherwise returns 0!
         return null;
-    }*/
+    }
     //fuck gamebanana rules, i wanted to make malfunction better *cries (jason)
 }

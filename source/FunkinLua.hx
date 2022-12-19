@@ -33,6 +33,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxAssets.FlxShader;
+import flixel.util.FlxAxes;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
@@ -1632,8 +1633,9 @@ class FunkinLua {
 			PlayState.instance.moveCamera(isDad);
 			return isDad;
 		});
-		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
-			cameraFromString(camera).shake(intensity, duration);
+		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float, ?axes:String) {
+			if(!ClientPrefs.screenShake)
+				cameraFromString(camera).shake(intensity, duration, axesFromString(axes));
 		});
 
 		Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
@@ -3119,6 +3121,14 @@ class FunkinLua {
 			case 'camother' | 'other': return PlayState.instance.camOther;
 		}
 		return PlayState.instance.camGame;
+	}
+
+	function axesFromString(axes:String):FlxAxes {
+		switch(axes.toLowerCase()) {
+			case 'x' | 'X': return FlxAxes.X;
+			case 'y' | 'Y': return FlxAxes.Y;
+		}
+		return FlxAxes.XY;
 	}
 
 	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
